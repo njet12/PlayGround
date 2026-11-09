@@ -166,13 +166,14 @@ function skid(x,z,color){const g=new THREE.Mesh(new THREE.BoxGeometry(.035,.015,
 function land(){const rotationCount=Math.abs(state.spin)/(Math.PI*2), tricks=state.flip+state.grab+rotationCount*2;const name=state.trickLabel==='OLLIE'?(state.airMax>.45?'OLLIE':'MANUAL'):(state.trickLabel==='PUSH TO ROLL'?'MANUAL':state.trickLabel);const base=Math.max(100,Math.round(100+tricks*180+state.airMax*75));const multiplier=Math.max(1,state.combo+1);const earned=base*multiplier;state.score+=earned;state.combo=Math.min(state.combo+1,9);state.comboName=name;setTrick(name,earned);airState.textContent='CLEAN LANDING';updateScore();beep(540+state.combo*55,.09,'triangle');skid(skater.position.x,skater.position.z,'#282d2a');}
 function wipeout(){state.combo=0;state.comboName='';state.speed*=.42;state.wipeout=.75;state.air=0;state.flip=state.spin=state.grab=0;setTrick('WIPEOUT',0);popToast();beep(90,.25,'sawtooth',.06);skater.rotation.z=1.2;updateScore();}
 
-// Camera follows the rider with a mild cinematic lean, preserving the whole bowl in frame.
-const camTarget=new THREE.Vector3(),desiredCamera=new THREE.Vector3();
+// The deck and rider face local -Z. Use that single heading for travel and the follow camera.
+// This keeps steering, movement, and the player's view in the same coordinate frame.
+const boardForward=new THREE.Vector3(),camTarget=new THREE.Vector3(),desiredCamera=new THREE.Vector3();
 function update(dt){state.elapsed+=dt;
  if(state.running){state.time=Math.max(0,state.time-dt);if(state.time===0)finishRun();
    let accel=0;if(keys.has('w'))accel=15;else if(keys.has('s'))accel=-17;state.speed+=accel*dt;state.speed*=Math.pow(keys.has('s')?.992:.987,dt*60);state.speed=THREE.MathUtils.clamp(state.speed,0,24);
    const turn=(keys.has('a')?1:0)-(keys.has('d')?1:0);skater.rotation.y+=turn*dt*(1.55+state.speed*.09);
-   const forward=new THREE.Vector3(Math.sin(skater.rotation.y),0,Math.cos(skater.rotation.y));skater.position.x+=forward.x*state.speed*dt;skater.position.z-=forward.z*state.speed*dt;
+   boardForward.set(0,0,-1).applyQuaternion(skater.quaternion);skater.position.x+=boardForward.x*state.speed*dt;skater.position.z+=boardForward.z*state.speed*dt;
    skater.position.x=THREE.MathUtils.clamp(skater.position.x,-25.5,25.5);skater.position.z=THREE.MathUtils.clamp(skater.position.z,-22.5,22.5);
    const ground=groundHeight(skater.position.x,skater.position.z);const previousAir=state.air;
    if(state.air>0){state.air=Math.max(0,state.air-dt);state.airMax=Math.max(state.airMax,state.air);skater.position.y=Math.max(ground,skater.position.y-7.2*dt);board.rotation.x=state.flip*Math.PI*2*(1-state.air/.72);board.rotation.y=state.spin*(1-state.air/.72);rider.rotation.z=state.spin*.18;airState.textContent='IN THE AIR';}
@@ -188,6 +189,6 @@ function update(dt){state.elapsed+=dt;
  }else{state.speed=Math.max(0,state.speed-dt*2);speedEl.textContent=String(Math.round(state.speed*4.2)).padStart(2,'0');}
  const ground=groundHeight(skater.position.x,skater.position.z);shadowDisc.position.set(skater.position.x,.132,skater.position.z);shadowDisc.scale.setScalar(1+Math.max(0,skater.position.y-ground)*.2);shadowDisc.material.opacity=Math.max(.07,.22-(skater.position.y-ground)*.1);
  board.position.y=Math.sin(state.elapsed*13)*.018*(state.speed/24)+(state.air>0?Math.sin((.72-state.air)*28)*.03:0);if(state.running&&state.air===0){rider.rotation.x=THREE.MathUtils.lerp(rider.rotation.x,keys.has('w')?-.12:.03,dt*5);legPivots.forEach((p,i)=>p.rotation.x=Math.sin(state.elapsed*8+i*Math.PI)*.06*(state.speed/20));}
- camTarget.set(skater.position.x,1.8+skater.position.y*.25,skater.position.z);desiredCamera.set(skater.position.x-Math.sin(skater.rotation.y)*1.2,9.3+Math.max(0,state.speed-14)*.07,skater.position.z+15.3);camera.position.lerp(desiredCamera,1-Math.pow(.001,dt));camera.lookAt(camTarget.x,camTarget.y-.4,camTarget.z-1.6);
+ boardForward.set(0,0,-1).applyQuaternion(skater.quaternion);camTarget.set(skater.position.x+boardForward.x*1.6,1.8+skater.position.y*.25,skater.position.z+boardForward.z*1.6);desiredCamera.set(skater.position.x-boardForward.x*15.3,9.3+Math.max(0,state.speed-14)*.07,skater.position.z-boardForward.z*15.3);camera.position.lerp(desiredCamera,1-Math.pow(.001,dt));camera.lookAt(camTarget.x,camTarget.y-.4,camTarget.z);
 }
 const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);update(dt);renderer.render(scene,camera);}animate();
