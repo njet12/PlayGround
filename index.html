@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b1320" />
+<link rel="icon" href="data:," />
+<title>Kenjiro — Samurai Duel</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="stage">
+    <canvas id="game" aria-label="Samurai duel arena"></canvas>
+
+    <div id="touch" class="touch-ui" aria-label="Touch controls">
+      <div class="touch-cluster move-cluster">
+        <button class="tbtn move" data-action="left" aria-label="Move left">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4.5 8 12l7.5 7.5" /></svg>
+        </button>
+        <button class="tbtn move" data-action="right" aria-label="Move right">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5 16 12l-7.5 7.5" /></svg>
+        </button>
+      </div>
+
+      <div class="touch-cluster action-cluster">
+        <button class="tbtn dash" data-action="dash" aria-label="Dash">
+          <span class="tbtn-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M2 12h13M5 17h8M15 7l4 5-4 5" /></svg>
+          </span>
+          <span class="tbtn-label">DASH</span>
+        </button>
+        <button class="tbtn parry" data-action="parry" aria-label="Parry">
+          <span class="tbtn-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /></svg>
+          </span>
+          <span class="tbtn-label">PARRY</span>
+        </button>
+        <button class="tbtn slash" data-action="slash" aria-label="Slash">
+          <span class="tbtn-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M14 4h6v6M4 16l4 4" /></svg>
+          </span>
+          <span class="tbtn-label">SLASH</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="hint" class="hint" aria-hidden="true">
+      <span><b>A</b><b>D</b> move</span>
+      <span><b>J</b> slash</span>
+      <span><b>K</b> parry</span>
+      <span><b>L</b> dash</span>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
